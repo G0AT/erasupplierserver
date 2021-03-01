@@ -4,7 +4,7 @@
   "description": "Administrador para era supplier",
   "main": "index.js",
   "scripts": {
-    "start": "node . npm start",
+    "start": "node . run start",
     "dev": "nodemon ."
   },
   "author": "Miguel Ángel González López",
