@@ -1,0 +1,22 @@
+{
+  "name": "erasupplierserver",
+  "version": "3.14.2",
+  "description": "Administrador para era supplier",
+  "main": "index.js",
+  "scripts": {
+    "start": "node . node_modules/.bin/nodemon src/index.js",
+    "dev": "nodemon ."
+  },
+  "author": "Miguel Ángel González López",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^2.21.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.11.18"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
