@@ -12,7 +12,8 @@ const SubAlmacenSchema = mongoose.Schema({
     },
     grupo:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Grupo'
+        ref: 'Grupo',
+        unique:true
     },
     creador:{
         type: mongoose.Schema.Types.ObjectId,

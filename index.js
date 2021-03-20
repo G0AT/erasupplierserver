@@ -13,17 +13,22 @@ const server = new ApolloServer({
     typeDefs,
     resolvers,
     context: ({req}) => {
-        //console.log(req.headers['authorization']);
+        // Pasamos la autorización o un caracter vacío
         const token = req.headers['authorization'] || '';
 
+        //Validación de existencia del token
         if(token){
+            //Cacheo que ejecuta la verificación del token
             try {
+                //transportamos los datos dentro del jwt remplazando la cabecera original, añadimos la palabra secreta para asegurar una conexión permitida
                 const usuario = jwt.verify(token.replace('Bearer ', ''), process.env.SECRETA);
 
+                //Retornamos los datos existentes en la constante del usuario
                 return{
                     usuario
                 }
             } catch (error) {
+                // Atrapamos los errores que puedan existir
                 console.log(error);
             }
         }
@@ -31,6 +36,10 @@ const server = new ApolloServer({
 });
 
 //Definimos en que puerto se ejecuta apollo y se inicia
+/**
+ * le decimos al servidor el puerto al que debe de conectarse
+ * es configurado de este modo para que Heroku coloque el puerto disponible y no se limite al 4000
+ */
 server.listen({port: process.env.PORT || 4000}).then(({url}) => {
     console.log(`Servidor funcionando en puerto: ${url}`)
 })

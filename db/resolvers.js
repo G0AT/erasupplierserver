@@ -34,7 +34,7 @@ const resolvers = {
             const usuario = await Usuario.findById(id);
 
             if(!usuario) {
-                throw new Error('Producto no encontrado');
+                throw new Error('Usuario no encontrado');
             }
 
             return usuario;
@@ -64,28 +64,14 @@ const resolvers = {
             } catch (error) {
                 console.log(error);
             }
-        },// , 
-        // obtenerClientesVendedor: async (_, {}, ctx ) => {
-        //     try {
-        //         const clientes = await Cliente.find({ vendedor: ctx.usuario.id.toString() });
-        //         return clientes;
-        //     } catch (error) {
-        //         console.log(error);
-        //     }
-        // }
-         
-        obtenerGrupoId: async (_, { id }, ctx) => {
+        },         
+        obtenerGrupoId: async (_, { id }) => {
             // Revisar si el grupo existe o no
             const grupo = await Grupo.findById(id);
 
             if(!grupo) {
                 throw new Error('Grupo no encontrado');
             }
-
-            // Quien lo creo puede verlo
-            // if(cliente.vendedor.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
 
             return grupo;
         }, 
@@ -97,89 +83,23 @@ const resolvers = {
             } catch (error) {
                 console.log(error);
             }
-        }, 
-        // obtenerPedidosVendedor: async (_, {}, ctx) => {
-        //     try {
-        //         const pedidos = await Pedido.find({ vendedor: ctx.usuario.id }).populate('cliente');
-
-        //         // console.log(pedidos);
-        //         return pedidos;
-        //     } catch (error) {
-        //         console.log(error);
-        //     }
-        // }, 
-        obtenerSubAlmacenId: async(_, {id}, ctx) => {
+        },
+        obtenerSubAlmacenId: async(_, {id}) => {
             // Si el subAlmacen existe o no
             const subAlmacen = await SubAlmacen.findById(id);
             if(!subAlmacen) {
                 throw new Error('Sub Almacén no encontrado');
             }
 
-            // Solo quien lo creo puede verlo
-            // if(subAlmacen.vendedor.toString() !== ctx.usuario.id) {
-            //     throw new Error('No tienes las credenciales');
-            // }
-
             // retornar el resultado
             return subAlmacen;
         }, 
-        obtenerSubAlmacenEstado: async (_, { estadoMaterial }, ctx) => {
+        obtenerSubAlmacenEstado: async (_, { estadoMaterial }) => {
             //Esto se añade antes del estado para validar si se desea ajustar a que solo el creador lo vea
-            // vendedor: ctx.usuario.id, 
             const subAlmacen = await SubAlmacen.find({ estadoMaterial });
 
             return subAlmacen;
         },
-        // mejoresClientes: async () => {
-        //     const clientes = await Pedido.aggregate([
-        //         { $match : { estado : "COMPLETADO" } },
-        //         { $group : {
-        //             _id : "$cliente", 
-        //             total: { $sum: '$total' }
-        //         }}, 
-        //         {
-        //             $lookup: {
-        //                 from: 'clientes', 
-        //                 localField: '_id',
-        //                 foreignField: "_id",
-        //                 as: "cliente"
-        //             }
-        //         }, 
-        //         {
-        //             $limit: 10
-        //         }, 
-        //         {
-        //             $sort : { total : -1 }
-        //         }
-        //     ]);
-
-        //     return clientes;
-        // }, 
-        // mejoresVendedores: async () => {
-        //     const vendedores = await Pedido.aggregate([
-        //         { $match : { estado : "COMPLETADO"} },
-        //         { $group : {
-        //             _id : "$vendedor", 
-        //             total: {$sum: '$total'}
-        //         }},
-        //         {
-        //             $lookup: {
-        //                 from: 'usuarios', 
-        //                 localField: '_id',
-        //                 foreignField: '_id',
-        //                 as: 'vendedor'
-        //             }
-        //         }, 
-        //         {
-        //             $limit: 3
-        //         }, 
-        //         {
-        //             $sort: { total : -1 }
-        //         }
-        //     ]);
-
-        //     return vendedores;
-        // },
         buscarAlmacen: async(_, { texto }) => {
             const almacen = await Almacen.find({ $text: { $search: texto  } }).limit(10);
             
@@ -188,7 +108,6 @@ const resolvers = {
     }, 
     Mutation: {
         nuevoUsuario: async (_, { input } ) => {
-
             const { email, password } = input;
             
             // Revisar si el usuario ya esta registrado
@@ -211,7 +130,6 @@ const resolvers = {
             }
         },
         nuevoUsuarioInterno: async (_, { input } ) => {
-
             const { email, password } = input;
             
             // Revisar si el usuario ya esta registrado
@@ -302,7 +220,7 @@ const resolvers = {
             let almacen = await Almacen.findById(id);
 
             if(!almacen) {
-                throw new Error('Producto no encontrado');
+                throw new Error('Material no encontrado');
             }
 
             // guardarlo en la base de datos
@@ -315,7 +233,7 @@ const resolvers = {
             let almacen = await Almacen.findById(id);
 
             if(!almacen) {
-                throw new Error('Producto no encontrado');
+                throw new Error('Material no encontrado');
             }
 
             // Eliminar
@@ -350,18 +268,13 @@ const resolvers = {
                 console.log(error);
             }
         },
-        actualizarGrupo: async (_, {id, input}, ctx) => {
+        actualizarGrupo: async (_, {id, input}) => {
             // Verificar si existe o no
             let grupo = await Grupo.findById(id);
 
             if(!grupo) {
                 throw new Error('El grupo no existe');
             }
-
-            // Verificar si el vendedor es quien edita
-            // if(grupo.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
 
             // guardar el grupo
             grupo = await Grupo.findOneAndUpdate({_id : id}, input, {new: true} );
@@ -374,11 +287,6 @@ const resolvers = {
             if(!grupo) {
                 throw new Error('El grupo no existe');
             }
-
-            // Verificar si el creador es quien edita
-            // if(grupo.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
 
             // Eliminar Grupo
             await Grupo.findOneAndDelete({_id : id});
@@ -394,11 +302,6 @@ const resolvers = {
             if(!grupoExiste) {
                 throw new Error('El grupo no existe');
             }
-
-            // Verificar si el creador es dueño
-            // if(grupoExiste.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
 
             // Revisar que el stock este disponible
             for await ( const articulo of input.almacenados ) {
@@ -426,26 +329,21 @@ const resolvers = {
             const resultado = await nuevoSubAlmacen.save();
             return resultado;
         },
-        actualizarSubAlmacen: async(_, {id, input}, ctx) => {
+        actualizarSubAlmacen: async(_, {id, input}) => {
 
             const { grupo } = input;
 
             // Si el subalmacén existe
             const existeSubAlmacen = await SubAlmacen.findById(id);
             if(!existeSubAlmacen) {
-                throw new Error('El pedido no existe');
+                throw new Error('El subalmacen no existe');
             }
 
             // Si el subalmacén existe
             const existeGrupo = await Grupo.findById(grupo);
             if(!existeGrupo) {
-                throw new Error('El Cliente no existe');
+                throw new Error('El grupo no existe');
             }
-
-            // Si el cliente y pedido pertenece al vendedor
-            // if(existeGrupo.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
 
             // Revisar el stock
             if( input.subAlmacen ) {
@@ -470,17 +368,12 @@ const resolvers = {
             return resultado;
 
         },
-        eliminarSubAlmacen: async (_, {id}, ctx) => {
+        eliminarSubAlmacen: async (_, {id}) => {
             // Verificar si el subAlmacen existe o no
             const subAlmacen = await SubAlmacen.findById(id);
             if(!subAlmacen) {
                 throw new Error('El subAlmacen no existe')
             }
-
-            // verificar si el vendedor es quien lo borra
-            // if(subAlmacen.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales')
-            // }
 
             // eliminar de la base de datos
             await SubAlmacen.findOneAndDelete({_id: id});
