@@ -303,6 +303,10 @@ const resolvers = {
                 throw new Error('El grupo no existe');
             }
 
+            if(grupoExiste) {
+                throw new Error('No puedo crear un subalmacen con el grupo similar');
+            }
+
             // Revisar que el stock este disponible
             for await ( const articulo of input.almacenados ) {
                 const { id } = articulo;
