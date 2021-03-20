@@ -298,9 +298,14 @@ const resolvers = {
 
             // Verificar si existe o no
             const grupoExiste = await Grupo.findById(grupo);
-
             if(!grupoExiste) {
                 throw new Error('El grupo no existe');
+            }
+
+            //Verificamos si existe en grupo en algún subalmacen ya registrado
+            const grupoSubAlmacen = await SubAlmacen.findById(grupo);
+            if(grupoSubAlmacen) {
+                throw new Error('El grupo ya ha sido asignado');
             }
 
             // Revisar que el stock este disponible
