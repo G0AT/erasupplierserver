@@ -51,7 +51,6 @@ const typeDefs = gql `
         nombre: String!
         apellido: String!
         email: String!
-        password: String
         password: String!
     }
 
@@ -60,6 +59,13 @@ const typeDefs = gql `
         apellido: String!
         email: String!
         password: String!
+        estatus: String!
+    }
+
+    input UpdateUsuarioInput {
+        nombre: String!
+        apellido: String!
+        email: String!
         estatus: String!
     }
 
@@ -114,7 +120,7 @@ const typeDefs = gql `
 
         #SubAlmacen
         obtenerSubAlmacen: [SubAlmacen]
-        obtenerSubAlmacenGrupo: [SubAlmacen]
+        obtenerSubAlmacenUsuario: [SubAlmacen]
         obtenerSubAlmacenId(id: ID!): SubAlmacen
         obtenerSubAlmacenEstado(estado: String!): [SubAlmacen]
 
@@ -127,7 +133,7 @@ const typeDefs = gql `
         nuevoUsuario(input: UsuarioInput): Usuario
         nuevoUsuarioInterno(input: UsuarioInternoInput): Usuario
         autenticarUsuario(input: AutenticarInput): Token
-        actualizarUsuario(id: ID!, input: UsuarioInternoInput): Usuario
+        actualizarUsuario(id: ID!, input: UpdateUsuarioInput): Usuario
         eliminarUsuario(id: ID!): String
 
         #Almacen

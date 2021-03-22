@@ -30,7 +30,7 @@ const resolvers = {
             }
         },
         obtenerUsuarioId: async (_, { id }) => {
-            // revisar si el usuario existe o no
+            // revisar si el producto existe o no
             const usuario = await Usuario.findById(id);
 
             if(!usuario) {
@@ -74,17 +74,8 @@ const resolvers = {
             }
 
             return grupo;
-        },
+        }, 
         obtenerSubAlmacen: async () => {
-            try {
-                const subAlmacen = await SubAlmacen.find({});
-                //console.log(subAlmacen)
-                return subAlmacen;
-            } catch (error) {
-                console.log(error)
-            }
-        },
-        obtenerSubAlmacenGrupo: async () => {
             try {
                 const subAlmacen = await SubAlmacen.find({}).populate('grupo');
                 //console.log(subAlmacen);
@@ -168,10 +159,6 @@ const resolvers = {
                 throw new Error('Usuario no encontrado');
             }
 
-            // Hashear su password
-            const salt = await bcryptjs.genSalt(10);
-            input.password = await bcryptjs.hash(password, salt);
-
             // guardarlo en la base de datos
             usuario = await Usuario.findOneAndUpdate({ _id : id }, input, { new: true } );
 
@@ -212,7 +199,7 @@ const resolvers = {
 
             // Crear el token
             return {
-                token: crearToken(existeUsuario, process.env.SECRETA, '24h' ) 
+                token: crearToken(existeUsuario, process.env.SECRETA, '8h' ) 
             }
             
         },
@@ -233,7 +220,7 @@ const resolvers = {
             let almacen = await Almacen.findById(id);
 
             if(!almacen) {
-                throw new Error('Material no encontrado');
+                throw new Error('Producto no encontrado');
             }
 
             // guardarlo en la base de datos
@@ -246,7 +233,7 @@ const resolvers = {
             let almacen = await Almacen.findById(id);
 
             if(!almacen) {
-                throw new Error('Material no encontrado');
+                throw new Error('Producto no encontrado');
             }
 
             // Eliminar
@@ -364,16 +351,16 @@ const resolvers = {
             // Si el subalmacén existe
             const existeSubAlmacen = await SubAlmacen.findById(id);
             if(!existeSubAlmacen) {
-                throw new Error('El subalmacen no existe');
+                throw new Error('El pedido no existe');
             }
 
             // Si el subalmacén existe
             const existeGrupo = await Grupo.findById(grupo);
             if(!existeGrupo) {
-                throw new Error('El grupo no existe');
+                throw new Error('El Cliente no existe');
             }
 
-            // Si el grupo y subalmacen pertenece al registrante
+            // Si el cliente y pedido pertenece al vendedor
             // if(existeGrupo.creador.toString() !== ctx.usuario.id ) {
             //     throw new Error('No tienes las credenciales');
             // }
@@ -396,7 +383,7 @@ const resolvers = {
                 }
             }
 
-            // Guardar el subalmacen
+            // Guardar el pedido
             const resultado = await SubAlmacen.findOneAndUpdate({_id: id}, input, { new: true });
             return resultado;
 

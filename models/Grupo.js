@@ -10,8 +10,7 @@ const GrupoSchema = mongoose.Schema({
     codigoGrupo:{
         type: String,
         required: true,
-        trim: true,
-        unique: true
+        trim: true
     },
     creador: {
         type: mongoose.Schema.Types.ObjectId,
