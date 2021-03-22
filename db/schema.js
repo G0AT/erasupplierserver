@@ -65,6 +65,7 @@ const typeDefs = gql `
     input UpdateUsuarioInput {
         nombre: String!
         apellido: String!
+        password: String!
         email: String!
         estatus: String!
     }
@@ -120,7 +121,7 @@ const typeDefs = gql `
 
         #SubAlmacen
         obtenerSubAlmacen: [SubAlmacen]
-        obtenerSubAlmacenUsuario: [SubAlmacen]
+        obtenerSubAlmacenGrupo: [SubAlmacen]
         obtenerSubAlmacenId(id: ID!): SubAlmacen
         obtenerSubAlmacenEstado(estado: String!): [SubAlmacen]
 

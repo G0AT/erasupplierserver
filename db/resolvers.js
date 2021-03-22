@@ -30,7 +30,7 @@ const resolvers = {
             }
         },
         obtenerUsuarioId: async (_, { id }) => {
-            // revisar si el producto existe o no
+            // revisar si el usuario existe o no
             const usuario = await Usuario.findById(id);
 
             if(!usuario) {
@@ -74,8 +74,17 @@ const resolvers = {
             }
 
             return grupo;
-        }, 
+        },
         obtenerSubAlmacen: async () => {
+            try {
+                const subAlmacen = await SubAlmacen.find({});
+                //console.log(subAlmacen)
+                return subAlmacen;
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        obtenerSubAlmacenGrupo: async () => {
             try {
                 const subAlmacen = await SubAlmacen.find({}).populate('grupo');
                 //console.log(subAlmacen);
@@ -158,6 +167,10 @@ const resolvers = {
             if(!usuario) {
                 throw new Error('Usuario no encontrado');
             }
+
+            // Hashear su password
+            const salt = await bcryptjs.genSalt(10);
+            input.password = await bcryptjs.hash(password, salt);
 
             // guardarlo en la base de datos
             usuario = await Usuario.findOneAndUpdate({ _id : id }, input, { new: true } );
@@ -268,13 +281,18 @@ const resolvers = {
                 console.log(error);
             }
         },
-        actualizarGrupo: async (_, {id, input}) => {
+        actualizarGrupo: async (_, {id, input}, ctx) => {
             // Verificar si existe o no
             let grupo = await Grupo.findById(id);
 
             if(!grupo) {
                 throw new Error('El grupo no existe');
             }
+
+            // Verificar si el vendedor es quien edita
+            // if(grupo.creador.toString() !== ctx.usuario.id ) {
+            //     throw new Error('No tienes las credenciales');
+            // }
 
             // guardar el grupo
             grupo = await Grupo.findOneAndUpdate({_id : id}, input, {new: true} );
@@ -288,6 +306,11 @@ const resolvers = {
                 throw new Error('El grupo no existe');
             }
 
+            // Verificar si el creador es quien edita
+            // if(grupo.creador.toString() !== ctx.usuario.id ) {
+            //     throw new Error('No tienes las credenciales');
+            // }
+
             // Eliminar Grupo
             await Grupo.findOneAndDelete({_id : id});
             return "Grupo Eliminado"
@@ -298,15 +321,15 @@ const resolvers = {
 
             // Verificar si existe o no
             const grupoExiste = await Grupo.findById(grupo);
+
             if(!grupoExiste) {
                 throw new Error('El grupo no existe');
             }
 
-            //Verificamos si existe en grupo en algún subalmacen ya registrado
-            const grupoSubAlmacen = await SubAlmacen.findById(grupo);
-            if(grupoSubAlmacen) {
-                throw new Error('El grupo ya ha sido asignado');
-            }
+            // Verificar si el creador es dueño
+            // if(grupoExiste.creador.toString() !== ctx.usuario.id ) {
+            //     throw new Error('No tienes las credenciales');
+            // }
 
             // Revisar que el stock este disponible
             for await ( const articulo of input.almacenados ) {
@@ -334,7 +357,7 @@ const resolvers = {
             const resultado = await nuevoSubAlmacen.save();
             return resultado;
         },
-        actualizarSubAlmacen: async(_, {id, input}) => {
+        actualizarSubAlmacen: async(_, {id, input}, ctx) => {
 
             const { grupo } = input;
 
@@ -349,6 +372,11 @@ const resolvers = {
             if(!existeGrupo) {
                 throw new Error('El grupo no existe');
             }
+
+            // Si el grupo y subalmacen pertenece al registrante
+            // if(existeGrupo.creador.toString() !== ctx.usuario.id ) {
+            //     throw new Error('No tienes las credenciales');
+            // }
 
             // Revisar el stock
             if( input.subAlmacen ) {
@@ -368,17 +396,22 @@ const resolvers = {
                 }
             }
 
-            // Guardar el pedido
+            // Guardar el subalmacen
             const resultado = await SubAlmacen.findOneAndUpdate({_id: id}, input, { new: true });
             return resultado;
 
         },
-        eliminarSubAlmacen: async (_, {id}) => {
+        eliminarSubAlmacen: async (_, {id}, ctx) => {
             // Verificar si el subAlmacen existe o no
             const subAlmacen = await SubAlmacen.findById(id);
             if(!subAlmacen) {
                 throw new Error('El subAlmacen no existe')
             }
+
+            // verificar si el vendedor es quien lo borra
+            // if(subAlmacen.creador.toString() !== ctx.usuario.id ) {
+            //     throw new Error('No tienes las credenciales')
+            // }
 
             // eliminar de la base de datos
             await SubAlmacen.findOneAndDelete({_id: id});
