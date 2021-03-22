@@ -212,7 +212,7 @@ const resolvers = {
 
             // Crear el token
             return {
-                token: crearToken(existeUsuario, process.env.SECRETA, '8h' ) 
+                token: crearToken(existeUsuario, process.env.SECRETA, '24h' ) 
             }
             
         },

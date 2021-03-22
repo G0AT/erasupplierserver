@@ -51,6 +51,7 @@ const typeDefs = gql `
         nombre: String!
         apellido: String!
         email: String!
+        password: String
         password: String!
     }
 
