@@ -178,29 +178,18 @@ const resolvers = {
             return "Usuario eliminado correctamente";
         },
         autenticarUsuario: async (_, {input}) => {
-
             const { email, password } = input;
-
             // Si el usuario existe
             const existeUsuario = await Usuario.findOne({email});
-            if (!existeUsuario) {
-                throw new Error('El usuario o la contraseña son incorrectos');
-            }
-
-            if(existeUsuario.estatus === 'I'){
-                throw new Error('Su cuenta está inactiva, comuniquese con el administrador');
-            }
+            if (!existeUsuario) { throw new Error('El usuario o la contraseña son incorrectos'); }
+            if(existeUsuario.estatus === 'I'){ throw new Error('Su cuenta está inactiva, comuniquese con el administrador'); }
 
             // Revisar si el password es correcto
             const passwordCorrecto = await bcryptjs.compare( password, existeUsuario.password );
-            if(!passwordCorrecto) {
-                throw new Error('El usuario o la contraseña son incorrectos');
-            }
+            if(!passwordCorrecto) { throw new Error('El usuario o la contraseña son incorrectos'); }
 
             // Crear el token
-            return {
-                token: crearToken(existeUsuario, process.env.SECRETA, '8h' ) 
-            }
+            return { token: crearToken(existeUsuario, process.env.SECRETA, '8h' ) }
             
         },
         nuevoAlmacen: async (_, {input}) => {
@@ -220,7 +209,7 @@ const resolvers = {
             let almacen = await Almacen.findById(id);
 
             if(!almacen) {
-                throw new Error('Producto no encontrado');
+                throw new Error('Material no encontrado');
             }
 
             // guardarlo en la base de datos
@@ -242,11 +231,7 @@ const resolvers = {
             return "Material eliminado del almacén";
         },
         nuevoGrupo: async (_, { input }, ctx) => {
-
-            //console.log(ctx);
-
-            const { codigoGrupo } = input
-            // console.log(input);
+            const { codigoGrupo } = input;
             
             // Verificar si el grupo ya esta registrado
             const grupo = await Grupo.findOne({ codigoGrupo });
@@ -276,11 +261,6 @@ const resolvers = {
                 throw new Error('El grupo no existe');
             }
 
-            // Verificar si el vendedor es quien edita
-            // if(grupo.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
-
             // guardar el grupo
             grupo = await Grupo.findOneAndUpdate({_id : id}, input, {new: true} );
             return grupo;
@@ -293,100 +273,59 @@ const resolvers = {
                 throw new Error('El grupo no existe');
             }
 
-            // Verificar si el creador es quien edita
-            // if(grupo.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
-
             // Eliminar Grupo
             await Grupo.findOneAndDelete({_id : id});
             return "Grupo Eliminado"
         },
         nuevoSubAlmacen: async (_, {input}, ctx) => {
-            const { grupo } = input
-            //console.log(grupo)
-
+            const { grupo } = input;
             // Verificar si existe o no
             const grupoExiste = await Grupo.findById(grupo);
-
-            if(!grupoExiste) {
-                throw new Error('El grupo no existe');
-            }
-
-            // Verificar si el creador es dueño
-            // if(grupoExiste.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
-
+            if(!grupoExiste) { throw new Error('El grupo no existe'); }
             // Revisar que el stock este disponible
             for await ( const articulo of input.almacenados ) {
                 const { id } = articulo;
-                //console.log(id)
-                
                 const almacen = await Almacen.findById(id);
-
                 if(articulo.cantidad > almacen.existenciaMaterial) {
                     throw new Error(`El articulo: ${almacen.nombreMaterial} excede la cantidad disponible`);
                 } else {
                     // Restar la cantidad a lo disponible
                     almacen.existenciaMaterial = almacen.existenciaMaterial - articulo.cantidad;
-
                     await almacen.save();
                 }
             }
-
             // Crear un nuevo sub almacén
             const nuevoSubAlmacen = new SubAlmacen(input);
             // asignarle un creador
             nuevoSubAlmacen.creador = ctx.usuario.id;
-
             // Guardarlo en la base de datos
             const resultado = await nuevoSubAlmacen.save();
             return resultado;
         },
         actualizarSubAlmacen: async(_, {id, input}, ctx) => {
-
             const { grupo } = input;
-
             // Si el subalmacén existe
             const existeSubAlmacen = await SubAlmacen.findById(id);
-            if(!existeSubAlmacen) {
-                throw new Error('El pedido no existe');
-            }
-
+            if(!existeSubAlmacen) { throw new Error('El pedido no existe'); }
             // Si el subalmacén existe
             const existeGrupo = await Grupo.findById(grupo);
-            if(!existeGrupo) {
-                throw new Error('El Cliente no existe');
-            }
-
-            // Si el cliente y pedido pertenece al vendedor
-            // if(existeGrupo.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales');
-            // }
-
+            if(!existeGrupo) { throw new Error('El Cliente no existe'); }
             // Revisar el stock
             if( input.subAlmacen ) {
                 for await ( const articulo of input.subAlmacen ) {
                     const { id } = articulo;
-    
                     const almacen = await Almacen.findById(id);
-    
                     if(articulo.cantidad > almacen.existenciaMaterial) {
                         throw new Error(`El articulo: ${almacen.nombreMaterial} excede la cantidad disponible`);
                     } else {
                         // Restar la cantidad a lo disponible
-                        almacen.existenciaMaterial = almacen.existenciaMaterial - articulo.cantidad;
-    
-                        await almacen.save();
+                        almacen.existenciaMaterial = almacen.existenciaMaterial - articulo.cantidad; await almacen.save();
                     }
                 }
             }
-
             // Guardar el pedido
             const resultado = await SubAlmacen.findOneAndUpdate({_id: id}, input, { new: true });
             return resultado;
-
         },
         eliminarSubAlmacen: async (_, {id}, ctx) => {
             // Verificar si el subAlmacen existe o no
@@ -394,11 +333,6 @@ const resolvers = {
             if(!subAlmacen) {
                 throw new Error('El subAlmacen no existe')
             }
-
-            // verificar si el vendedor es quien lo borra
-            // if(subAlmacen.creador.toString() !== ctx.usuario.id ) {
-            //     throw new Error('No tienes las credenciales')
-            // }
 
             // eliminar de la base de datos
             await SubAlmacen.findOneAndDelete({_id: id});
